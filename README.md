@@ -12,8 +12,8 @@ AutoCare is a small project I built which allows you to manage all of your vehic
 
 ## Features
 
-* **Vehicle management:** Add/Remove vehicles
-* **Service Logging:** Add/Edit/Remove services for any of your vehicles
+* **Vehicle management:** Add/Delete vehicles
+* **Service Logging:** Add/Edit/Delete services for any of your vehicles
 * **Overdue Services tracker:** Never miss a service.
 
 

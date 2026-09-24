@@ -1,6 +1,32 @@
 import { useMemo } from "react";
 import { serviceInterval } from "../../serviceInterval.js";
 
+function downloadServiceCsv(service) {
+  const escapeCsvValue = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+  const cost = Number(service.cost);
+  const headers = ['Registration', 'Service Type', 'Date', 'Mileage (mi)', 'Cost (GBP)', 'Notes'];
+  const values = [
+    service.Vehicle?.licensePlate,
+    service.serviceType,
+    new Date(service.date).toLocaleDateString('en-GB'),
+    service.mileage,
+    Number.isFinite(cost) ? cost.toFixed(2) : '',
+    service.notes,
+  ];
+  const csv = [headers, values]
+    .map((row) => row.map(escapeCsvValue).join(','))
+    .join('\r\n');
+  const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const registration = service.Vehicle?.licensePlate?.replace(/[^a-z0-9]/gi, '-') || 'service';
+
+  link.href = url;
+  link.download = `${registration}-service.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function Dashboard ({vehicles, services}) {
   const recentActivity = services.slice(0,5);
   
@@ -86,8 +112,9 @@ export default function Dashboard ({vehicles, services}) {
             <p className="text-sm text-neutral-400 mt-1">{s.notes}</p>
           </div>
           <div className="flex items-center justify-end gap-6 p-3 content-center">
-            <button onClick={() => window.print()} className="bg-orange-500 hover:bg-orange-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Export</button>
-            <p className="font-semibold">£{s.cost.toFixed(2)}</p>
+            <button onClick={() => downloadServiceCsv(s)} className="bg-orange-500 hover:bg-orange-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Export CSV</button>
+            <button onClick={() => window.print()} className="bg-neutral-600 hover:bg-neutral-500 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Print PDF</button>
+            <p className="ml-2 text-4xl font-bold whitespace-nowrap">£{s.cost.toFixed(2)}</p>
           </div>
         </div>
       ))

@@ -18,8 +18,18 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.Vehicle = require('./vehicleModel.js')(sequelize,Sequelize);
-db.Service = require('./serviceModel.js')(sequelize,Sequelize);
+db.User = require('./userModel.js')(sequelize, Sequelize);
+db.Vehicle = require('./vehicleModel.js')(sequelize, Sequelize);
+db.Service = require('./serviceModel.js')(sequelize, Sequelize);
+
+db.User.hasMany(db.Vehicle, {
+  foreignKey: 'userId',
+  onDelete: 'CASCADE'
+});
+
+db.Vehicle.belongsTo(db.User, {
+  foreignKey: 'userId'
+});
 
 db.Vehicle.hasMany(db.Service, {
   foreignKey: 'vehicleId',

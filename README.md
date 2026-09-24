@@ -28,54 +28,58 @@ AutoCare is a small project I built which allows you to manage all of your vehic
 * Node.js + Express (REST API)
 * PostgreSQL + Sequelize (Database/ORM)
 
+---
+
 ## Getting Started
 
-**Requirements:**
+### Requirements
+* [Node.js](https://nodejs.org/en/download) (v18+ recommended)
+* [PostgreSQL](https://www.postgresql.org/download/)
 
-The project runs locally only for now. To run it on your machine you will need:
-* [Node.js](https://nodejs.org/en/download)
-* [PostgreSQL](https://www.postgresql.org/download/) 
+### Quick Start (First-Time Setup)
 
-**Installation:**
-
-Clone this repository and install required dependencies.
-```
-git clone <YOUR_REPO_URL>
-cd <YOUR_REPO_NAME>`
-```
-
-Install client dependencies.
-```
-cd client
-npm install
-```
-
-Install server dependencies.
-```
-cd ../server
-npm install
-```
-
-**Run Locally**
-
-You will need to start both the backend server and frontend client in order for the app to work
-
-1) **Start the backend**
-   
-   From the project root:
+1. **Clone the repository:**
+   ```bash
+   git clone <YOUR_REPO_URL>
+   cd auto-care
    ```
-   cd server
+
+2. **Install all dependencies (Root, Server, and Client):**
+   ```bash
+   npm run install:all
    ```
-   Start the server
-   ```
-   npm run start
-   ```
-   
-3) **Start the frontend**
-   
-   Open a new terminal, then from the project root:
-   ```
-   cd client
+
+3. **Database & Environment Setup:**
+   - Create a PostgreSQL database named `auto_care`:
+     ```bash
+     npm run db:create
+     # OR manually via psql:
+     # createdb auto_care
+     ```
+   - Set up environment variables if needed:
+     - `server/.env`: Copy from `server/.env.example`. Defaults: `DB_NAME=auto_care`, `DB_USER` uses your current system username or `postgres`, `PORT=3005`.
+     - `client/.env`: Copy from `client/.env.example`. Defaults: `VITE_API_URL=http://127.0.0.1:3005`.
+
+4. **Run both Frontend and Backend concurrently:**
+   ```bash
    npm run dev
    ```
 
+   - **Frontend:** [http://localhost:5173](http://localhost:5173)
+   - **Backend API:** [http://127.0.0.1:3005](http://127.0.0.1:3005)
+
+---
+
+### Manual / Separate Terminal Run (Optional)
+
+**Backend:**
+```bash
+cd server
+npm run start
+```
+
+**Frontend:**
+```bash
+cd client
+npm run dev
+```

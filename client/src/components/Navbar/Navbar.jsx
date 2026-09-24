@@ -1,14 +1,14 @@
 import { Link } from 'react-router';
 import logo from '../../assets/logo.png';
 
-export default function Navbar() {
+export default function Navbar({ user, onLogout }) {
   return (
     <nav className="bg-black border-b border-black shadow-2xl">
-      <div className="max-w-6xl mx-auto px-8 h-16 flex items-center">
+      <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <div className="font-bold text-orange-500 text-xl">
             <Link to='/'>
-            <img className='w-40' src={logo} alt='logo'/>
+              <img className='w-40' src={logo} alt='logo'/>
             </Link>
           </div>
           <div className="flex gap-5 text-neutral-400">
@@ -34,7 +34,7 @@ export default function Navbar() {
             </Link>
             <Link to="/logService" className="hover:text-white transition flex items-center gap-1">
               <svg 
-                xmlns="http://www.w3.org/2000/svg" 
+                xmlns="http://http://www.w3.org/2000/svg" 
                 height="20px" 
                 viewBox="0 -960 960 960" 
                 width="20px" 
@@ -44,6 +44,20 @@ export default function Navbar() {
             </Link>
           </div>
         </div>
+
+        {user && (
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-neutral-300 font-medium">
+              👋 {user.name}
+            </span>
+            <button
+              onClick={onLogout}
+              className="text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 px-3 py-1.5 rounded-lg transition cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );

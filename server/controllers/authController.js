@@ -2,19 +2,23 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../models/index.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'auto_care_secret_key_change_in_production';
+const JWT_SECRET = process.env.JWT_SECRET || 'codeWorks';
 
 async function register(req, res) {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.status(400).json({ msg: 'Please provide name, email, and password.' });
+    return res
+      .status(400)
+      .json({ msg: 'Please provide name, email, and password.' });
   }
 
   try {
     const existingUser = await db.User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ msg: 'User with this email already exists.' });
+      return res
+        .status(400)
+        .json({ msg: 'User with this email already exists.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -26,7 +30,9 @@ async function register(req, res) {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
     res.status(201).json({
       token,
@@ -60,7 +66,9 @@ async function login(req, res) {
       return res.status(400).json({ msg: 'Invalid email or password.' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
     res.status(200).json({
       token,

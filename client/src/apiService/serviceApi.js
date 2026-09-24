@@ -1,8 +1,18 @@
 const URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3005';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    Authorization: token ? `Bearer ${token}` : '',
+  };
+}
+
 export async function getServices() {
   try {
-    const res = await fetch(`${URL}/services`);
+    const res = await fetch(`${URL}/services`, {
+      headers: getAuthHeaders(),
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch services: ${res.status}`);
@@ -10,6 +20,7 @@ export async function getServices() {
     return res.json();
   } catch (error) {
     console.error(error);
+    return [];
   }
 }
 
@@ -17,7 +28,7 @@ export async function addService(data) {
   try {
     const res = await fetch(`${URL}/services`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -35,7 +46,7 @@ export async function removeService(id) {
   try {
     const res = await fetch(`${URL}/services/${id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
     });
 
     if (!res.ok) {
@@ -52,7 +63,7 @@ export async function editService(id, data) {
   try {
     const res = await fetch(`${URL}/services/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
 

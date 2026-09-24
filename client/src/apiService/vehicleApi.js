@@ -1,8 +1,18 @@
 const URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3005';
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    Authorization: token ? `Bearer ${token}` : '',
+  };
+}
+
 export async function getVehicles() {
   try {
-    const res = await fetch(`${URL}/vehicles`);
+    const res = await fetch(`${URL}/vehicles`, {
+      headers: getAuthHeaders(),
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch vehicles: ${res.status}`);
@@ -10,12 +20,15 @@ export async function getVehicles() {
     return res.json();
   } catch (error) {
     console.error(error);
+    return [];
   }
 }
 
 export async function getVehicleById(id) {
   try {
-    const res = await fetch(`${URL}/vehicles/${id}`);
+    const res = await fetch(`${URL}/vehicles/${id}`, {
+      headers: getAuthHeaders(),
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch vehicle: ${res.status}`);
@@ -27,11 +40,10 @@ export async function getVehicleById(id) {
 }
 
 export async function addVehicle(data) {
-  // data = {make, model, year, licensePlate};
   try {
     const res = await fetch(`${URL}/vehicles`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -49,7 +61,7 @@ export async function removeVehicle(id) {
   try {
     const res = await fetch(`${URL}/vehicles/${id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
     });
 
     if (!res.ok) {

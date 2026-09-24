@@ -76,4 +76,24 @@ async function deleteVehicle (req, res) {
   }
 };
 
-module.exports = {getVehicles, getVehicleById, addVehicle, deleteVehicle};
+async function updateVehicle (req, res) {
+  try {
+    const [updated] = await db.Vehicle.update(req.body, {
+      where: {
+        id: req.params.id,
+        userId: req.userId
+      }
+    });
+
+    if (!updated) {
+      return res.status(404).json({ msg: 'Vehicle Not Found.' });
+    }
+
+    res.status(200).json({ msg: 'Vehicle Updated Successfully!' });
+  } catch (error) {
+    res.status(500).json({ msg: 'Server Error' });
+    console.error(error);
+  }
+};
+
+module.exports = {getVehicles, getVehicleById, addVehicle, deleteVehicle, updateVehicle};

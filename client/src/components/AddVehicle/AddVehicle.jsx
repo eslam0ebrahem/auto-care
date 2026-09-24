@@ -1,30 +1,52 @@
 import { useState } from "react";
-import { addVehicle } from "../../apiService/vehicleApi";
+import { addVehicle, editVehicle } from "../../apiService/vehicleApi";
 
-export default function AddVehicle({onClose, fetchVehicles}) {
+export default function AddVehicle({onClose, fetchVehicles, vehicleToEdit, onVehicleUpdated}) {
   const currentYear = new Date().getFullYear();
-  const [form, setForm] = useState({
-    make: '',
-    model: '',
-    year: '',
-    licensePlate: ''
+  const [form, setForm] = useState(() => {
+    if (vehicleToEdit) {
+      return {
+        make: vehicleToEdit.make || '',
+        model: vehicleToEdit.model || '',
+        year: vehicleToEdit.year || '',
+        licensePlate: vehicleToEdit.licensePlate || ''
+      };
+    }
+    return {
+      make: '',
+      model: '',
+      year: '',
+      licensePlate: ''
+    };
   });
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await addVehicle({
+    const payload = {
       ...form,
       year: Number(form.year)
-    });
+    };
+
+    if (vehicleToEdit) {
+      await editVehicle(vehicleToEdit.id, payload);
+      if (onVehicleUpdated) {
+        await onVehicleUpdated();
+      }
+    } else {
+      await addVehicle(payload);
+    }
+
     await fetchVehicles();
     onClose();
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
-      <div className="bg-neutral-800 border border-neutral-700 p-6 rounded-xl w-96">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-neutral-800 border border-neutral-700 p-6 rounded-xl w-96 shadow-2xl">
         <div className="flex justify-between items-start">
-          <h2 className="text-xl mb-4 text-white font-semibold">Add Vehicle</h2>
+          <h2 className="text-xl mb-4 text-white font-semibold">
+            {vehicleToEdit ? 'Edit Vehicle' : 'Add Vehicle'}
+          </h2>
           <button className="hover:bg-red-500 rounded cursor-pointer p-1 transition" onClick={onClose}>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -97,7 +119,7 @@ export default function AddVehicle({onClose, fetchVehicles}) {
 
           <div className="flex justify-center mt-5">
             <button type="submit" className="bg-orange-600 px-3 py-2 rounded-xl w-full cursor-pointer hover:bg-orange-700 text-white font-medium transition">
-              Add Vehicle
+              {vehicleToEdit ? 'Save Changes' : 'Add Vehicle'}
             </button>
           </div>
         </form>

@@ -73,3 +73,21 @@ export async function removeVehicle(id) {
     console.error(error);
   }
 }
+
+export async function editVehicle(id, data) {
+  try {
+    const res = await fetch(`${URL}/vehicles/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to edit vehicle: ${res.status}`);
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error(error);
+  }
+}

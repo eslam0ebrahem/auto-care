@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import {useNavigate, useParams} from 'react-router'
 import { getVehicleById, removeVehicle } from '../../apiService/vehicleApi';
 import { removeService } from '../../apiService/serviceApi';
+import AddVehicle from '../AddVehicle/AddVehicle';
 
 export default function VehicleDetails ({fetchVehicles, fetchServices}) {
   const navigate = useNavigate();
   const [vehicle, setVehicle] = useState(null);
   const {id} = useParams();
+
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const getVehicle = async () => {
@@ -15,6 +18,11 @@ export default function VehicleDetails ({fetchVehicles, fetchServices}) {
     };
     getVehicle();
   }, [id]);
+
+  async function refreshVehicleDetails() {
+    const res = await getVehicleById(id);
+    setVehicle(res);
+  }
 
   async function handleDelete () {
     const confirmed = window.confirm('Are you sure you want to delete this vehicle?');
@@ -65,15 +73,29 @@ export default function VehicleDetails ({fetchVehicles, fetchServices}) {
             </h1>
           </div>
       </div>
-      <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 mt-4 px-3 py-2 rounded-lg transition font-semibold cursor-pointer">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          height="23px" 
-          viewBox="0 -960 960 960" 
-          width="23px" 
-          fill="#e3e3e3"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z"/>
-        </svg>
-      </button>
+      <div className="flex gap-2">
+        <button 
+          onClick={() => setIsEditing(true)} 
+          className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white mt-4 px-3 py-2 rounded-lg transition font-medium cursor-pointer flex items-center gap-1">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            height="20px" 
+            viewBox="0 -960 960 960" 
+            width="20px" 
+            fill="#e3e3e3"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z"/>
+          </svg>
+          Edit
+        </button>
+        <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 mt-4 px-3 py-2 rounded-lg transition font-semibold cursor-pointer">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            height="23px" 
+            viewBox="0 -960 960 960" 
+            width="23px" 
+            fill="#e3e3e3"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div>
       <div className="flex justify-between items-center mb-3">
@@ -144,6 +166,15 @@ export default function VehicleDetails ({fetchVehicles, fetchServices}) {
         </div>
       )}
     </div>
+
+    {isEditing && (
+      <AddVehicle
+        onClose={() => setIsEditing(false)}
+        fetchVehicles={fetchVehicles}
+        vehicleToEdit={vehicle}
+        onVehicleUpdated={refreshVehicleDetails}
+      />
+    )}
   </div>
 );
 }

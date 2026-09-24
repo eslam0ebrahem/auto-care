@@ -27,8 +27,31 @@ function downloadServiceCsv(service) {
   URL.revokeObjectURL(url);
 }
 
+function getServiceDueMessage(service) {
+  const [year, month, day] = service.date.split('T')[0].split('-').map(Number);
+  const dueDate = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysUntilDue = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
+
+  if (daysUntilDue < 0) return 'Service overdue';
+  if (daysUntilDue > 3) return null;
+  if (daysUntilDue === 0) return 'Service due today';
+  if (daysUntilDue === 1) return 'Service due tomorrow';
+  return `Service due in ${daysUntilDue} days`;
+}
+
+function getServiceDueDate(service) {
+  const [year, month, day] = service.date.split('T')[0].split('-').map(Number);
+  return new Date(year, month - 1, day).getTime();
+}
+
 export default function Dashboard ({vehicles, services}) {
-  const recentActivity = services.slice(0,5);
+  const recentActivity = useMemo(() => {
+    return [...services]
+      .sort((firstService, secondService) => getServiceDueDate(firstService) - getServiceDueDate(secondService))
+      .slice(0, 5);
+  }, [services]);
   
   const overdueServices = useMemo(() => {
     return vehicles.filter((v) => {
@@ -110,6 +133,9 @@ export default function Dashboard ({vehicles, services}) {
             <p className="font-medium">{s.serviceType}</p>
             <p className="text-sm text-neutral-400 mb-1"> {new Date(s.date).toLocaleDateString()} • {s.mileage.toLocaleString()} mi </p>
             <p className="text-sm text-neutral-400 mt-1">{s.notes}</p>
+          </div>
+          <div className="flex-1 flex items-center justify-center px-4 text-center text-orange-400 text-sm font-semibold">
+            {getServiceDueMessage(s)}
           </div>
           <div className="flex items-center justify-end gap-6 p-3 content-center">
             <button onClick={() => downloadServiceCsv(s)} className="bg-orange-500 hover:bg-orange-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Export CSV</button>

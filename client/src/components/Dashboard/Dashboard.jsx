@@ -86,6 +86,7 @@ export default function Dashboard ({vehicles, services}) {
             <p className="text-sm text-neutral-400 mt-1">{s.notes}</p>
           </div>
           <div className="text-right p-3 content-center">
+            <button onClick={() => window.print()} className="mr-4 bg-orange-500 hover:bg-orange-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Export</button>
             <p className="font-semibold">£{s.cost.toFixed(2)}</p>
           </div>
         </div>

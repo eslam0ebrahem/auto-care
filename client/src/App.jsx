@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { getVehicles } from './apiService/vehicleApi.js';
 import { getServices } from './apiService/serviceApi.js';
@@ -13,45 +13,57 @@ import LoginModal from './components/LoginModal/LoginModal.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [loadingAuth, setLoadingAuth] = useState(() => !!localStorage.getItem('token'));
   const [vehicles, setVehicles] = useState([]);
   const [services, setServices] = useState([]);
 
-  async function fetchVehicles() {
+  const fetchVehicles = useCallback(async () => {
     const res = await getVehicles();
     setVehicles(res || []);
-  }
+  }, []);
 
-  async function fetchServices() {
+  const fetchServices = useCallback(async () => {
     const res = await getServices();
     setServices(res || []);
-  }
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      getMe(token)
-        .then((userData) => {
-          setUser(userData);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        })
-        .finally(() => setLoadingAuth(false));
-    } else {
-      setLoadingAuth(false);
-    }
   }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchVehicles();
-      fetchServices();
-    } else {
-      setVehicles([]);
-      setServices([]);
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    let isMounted = true;
+    getMe(token)
+      .then((userData) => {
+        if (isMounted) setUser(userData);
+      })
+      .catch(() => {
+        localStorage.removeItem('token');
+        if (isMounted) setUser(null);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingAuth(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      return;
     }
+    let isMounted = true;
+    Promise.all([getVehicles(), getServices()]).then(([vRes, sRes]) => {
+      if (isMounted) {
+        setVehicles(vRes || []);
+        setServices(sRes || []);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   function handleLoginSuccess(userData) {
@@ -61,6 +73,8 @@ function App() {
   function handleLogout() {
     localStorage.removeItem('token');
     setUser(null);
+    setVehicles([]);
+    setServices([]);
   }
 
   if (loadingAuth) {

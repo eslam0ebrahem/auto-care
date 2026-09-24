@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {useNavigate, useParams} from 'react-router'
 import { getVehicleById, removeVehicle } from '../../apiService/vehicleApi';
 import { removeService } from '../../apiService/serviceApi';
-import { format } from 'date-fns';
 
 export default function VehicleDetails ({fetchVehicles, fetchServices}) {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from 'react-router';
 import { addService, editService } from "../../apiService/serviceApi";
 import { Link } from "react-router";
@@ -13,31 +13,29 @@ export default function LogService ({vehicles,services, fetchServices, fetchVehi
   const selectedVehicle = searchParams.get('vehicleId');
   const serviceEdit = searchParams.get('edit');
 
-  const [form, setForm] = useState({
-    vehicleId: selectedVehicle || '',
-    serviceType: '',
-    date: '',
-    mileage: '',
-    cost: '',
-    notes: ''
-  });
-
-  useEffect(() => {
+  const [form, setForm] = useState(() => {
     if (serviceEdit) {
-     const service = services.find((s) => s.id === Number(serviceEdit));
-
-      if(service) {
-       setForm({
+      const service = services.find((s) => s.id === Number(serviceEdit));
+      if (service) {
+        return {
           vehicleId: service.vehicleId,
           serviceType: service.serviceType,
           date: format(service.date, 'yyyy-MM-dd'),
           mileage: service.mileage,
           cost: service.cost,
           notes: service.notes || ''
-        });
+        };
       }
     }
-  }, [serviceEdit, services]);
+    return {
+      vehicleId: selectedVehicle || '',
+      serviceType: '',
+      date: '',
+      mileage: '',
+      cost: '',
+      notes: ''
+    };
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();

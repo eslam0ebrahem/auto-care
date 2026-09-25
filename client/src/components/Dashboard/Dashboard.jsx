@@ -1,50 +1,7 @@
 import { useMemo } from "react";
 import { serviceInterval } from "../../serviceInterval.js";
-
-function downloadServiceCsv(service) {
-  const escapeCsvValue = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
-  const cost = Number(service.cost);
-  const headers = ['Registration', 'Service Type', 'Date', 'Mileage (mi)', 'Cost (GBP)', 'Notes'];
-  const values = [
-    service.Vehicle?.licensePlate,
-    service.serviceType,
-    new Date(service.date).toLocaleDateString('en-GB'),
-    service.mileage,
-    Number.isFinite(cost) ? cost.toFixed(2) : '',
-    service.notes,
-  ];
-  const csv = [headers, values]
-    .map((row) => row.map(escapeCsvValue).join(','))
-    .join('\r\n');
-  const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  const registration = service.Vehicle?.licensePlate?.replace(/[^a-z0-9]/gi, '-') || 'service';
-
-  link.href = url;
-  link.download = `${registration}-service.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function getServiceDueMessage(service) {
-  const [year, month, day] = service.date.split('T')[0].split('-').map(Number);
-  const dueDate = new Date(year, month - 1, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const daysUntilDue = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
-
-  if (daysUntilDue < 0) return 'Service overdue';
-  if (daysUntilDue > 3) return null;
-  if (daysUntilDue === 0) return 'Service due today';
-  if (daysUntilDue === 1) return 'Service due tomorrow';
-  return `Service due in ${daysUntilDue} days`;
-}
-
-function getServiceDueDate(service) {
-  const [year, month, day] = service.date.split('T')[0].split('-').map(Number);
-  return new Date(year, month - 1, day).getTime();
-}
+import ExportPrintButton from "../ExportPrintButton/ExportPrintButton.jsx";
+import ServiceReminder, { getServiceDueDate } from "../ServiceReminder/ServiceReminder.jsx";
 
 export default function Dashboard ({vehicles, services}) {
   const recentActivity = useMemo(() => {
@@ -134,12 +91,9 @@ export default function Dashboard ({vehicles, services}) {
             <p className="text-sm text-neutral-400 mb-1"> {new Date(s.date).toLocaleDateString()} • {s.mileage.toLocaleString()} mi </p>
             <p className="text-sm text-neutral-400 mt-1">{s.notes}</p>
           </div>
-          <div className="flex-1 flex items-center justify-center px-4 text-center text-orange-400 text-sm font-semibold">
-            {getServiceDueMessage(s)}
-          </div>
+          <ServiceReminder service={s} />
           <div className="flex items-center justify-end gap-6 p-3 content-center">
-            <button onClick={() => downloadServiceCsv(s)} className="bg-orange-500 hover:bg-orange-700 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Export CSV</button>
-            <button onClick={() => window.print()} className="bg-neutral-600 hover:bg-neutral-500 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">Print PDF</button>
+            <ExportPrintButton service={s} />
             <p className="ml-2 text-4xl font-bold whitespace-nowrap">£{s.cost.toFixed(2)}</p>
           </div>
         </div>

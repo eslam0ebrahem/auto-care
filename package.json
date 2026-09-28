@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "start-server-and-test server:start 3005 server:test",
+    "server:start": "npm --prefix server run start",
+    "server:test": "npm --prefix server run test"
   },
   "repository": {
     "type": "git",
@@ -17,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/ivangeorgiev22/auto-care/issues"
   },
-  "homepage": "https://github.com/ivangeorgiev22/auto-care#readme"
+  "homepage": "https://github.com/ivangeorgiev22/auto-care#readme",
+  "devDependencies": {
+    "start-server-and-test": "^2.0.13"
+  }
 }

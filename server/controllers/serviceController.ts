@@ -1,22 +1,22 @@
-const db = require('../models/index.js');
+import { Response } from 'express';
+import db from '../models/index';
 
-
-async function getServices (req, res) {
+export async function getServices(req: any, res: Response) {
   try {
     const userVehicles = await db.Vehicle.findAll({
       where: { userId: req.userId },
-      attributes: ['id']
+      attributes: ['id'],
     });
-    const vehicleIds = userVehicles.map(v => v.id);
+    const vehicleIds = userVehicles.map((v: any) => v.id);
 
     const services = await db.Service.findAll({
       where: {
-        vehicleId: vehicleIds
+        vehicleId: vehicleIds,
       },
       order: [['date', 'DESC']],
       include: {
-        model: db.Vehicle
-      }
+        model: db.Vehicle,
+      },
     });
 
     res.status(200).json(services);
@@ -24,14 +24,14 @@ async function getServices (req, res) {
     res.status(500).json({ msg: 'Server Error' });
     console.error(error);
   }
-};
+}
 
-async function addService (req, res) {
+export async function addService(req: any, res: Response) {
   const { serviceType, date, mileage, cost, notes, vehicleId } = req.body;
 
   try {
     const vehicle = await db.Vehicle.findOne({
-      where: { id: vehicleId, userId: req.userId }
+      where: { id: vehicleId, userId: req.userId },
     });
 
     if (!vehicle) {
@@ -44,49 +44,47 @@ async function addService (req, res) {
       mileage,
       cost,
       notes,
-      vehicleId
+      vehicleId,
     });
-    res.status(201).json({msg: 'Service Created!', service});
+    res.status(201).json({ msg: 'Service Created!', service });
   } catch (error) {
     res.status(500).json({ msg: 'Server Error' });
     console.error(error);
   }
-};
+}
 
-async function deleteService(req, res) {
+export async function deleteService(req: any, res: Response) {
   try {
-    const service = await db.Service.findByPk(req.params.id, {
-      include: { model: db.Vehicle }
+    const service: any = await db.Service.findByPk(req.params.id, {
+      include: { model: db.Vehicle },
     });
 
     if (!service || service.Vehicle.userId !== req.userId) {
-      return res.status(404).json({msg: 'Service not found!'});
+      return res.status(404).json({ msg: 'Service not found!' });
     }
 
     await service.destroy();
-    res.status(200).json({msg: 'Service deleted successfully!'});
+    res.status(200).json({ msg: 'Service deleted successfully!' });
   } catch (error) {
     res.status(500).json({ msg: 'Server Error' });
     console.error(error);
   }
-};
+}
 
-async function updateService(req,res) {
+export async function updateService(req: any, res: Response) {
   try {
-    const service = await db.Service.findByPk(req.params.id, {
-      include: { model: db.Vehicle }
+    const service: any = await db.Service.findByPk(req.params.id, {
+      include: { model: db.Vehicle },
     });
 
     if (!service || service.Vehicle.userId !== req.userId) {
-      return res.status(404).json({msg: 'Service Record Not Found!'});
+      return res.status(404).json({ msg: 'Service Record Not Found!' });
     }
 
     await service.update(req.body);
-    res.status(200).json({msg: 'Service Record Updated Successfully!'});
+    res.status(200).json({ msg: 'Service Record Updated Successfully!' });
   } catch (error) {
     res.status(500).json({ msg: 'Server Error' });
     console.log(error);
   }
 }
-
-module.exports = {getServices, addService, deleteService, updateService};

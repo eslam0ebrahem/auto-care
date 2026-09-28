@@ -1,21 +1,23 @@
-module.exports = (sequelize, DataTypes) => {
+import { DataTypes, Sequelize } from 'sequelize';
+
+export default (sequelize: Sequelize) => {
   const User = sequelize.define('User', {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true
-      }
+        isEmail: true,
+      },
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
-    }
+      allowNull: false,
+    },
   });
 
   return User;

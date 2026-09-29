@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loginUser, registerUser } from '../../apiService/authApi.js';
+import { loginUser, registerUser } from '../../apiService/authApi';
 
 export default function LoginModal({ onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);

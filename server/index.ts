@@ -1,10 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const authRouter = require('./routers/authRouter.js');
-const vehicleRouter = require('./routers/vehicleRouter.js');
-const serviceRouter = require('./routers/serviceRouter.js');
-const db = require('./models/index.js');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import authRouter from './routers/authRouter';
+import vehicleRouter from './routers/vehicleRouter';
+import serviceRouter from './routers/serviceRouter';
+import db from './models';
+
+dotenv.config();
 
 const PORT = process.env.PORT || 3005;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
@@ -13,7 +15,7 @@ const app = express();
 app.use(
   cors({
     origin: CLIENT_ORIGIN,
-  }),
+  })
 );
 app.use(express.json());
 

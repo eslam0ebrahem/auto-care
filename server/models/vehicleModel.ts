@@ -1,22 +1,21 @@
-const { DataTypes } = require("sequelize");
+import { DataTypes, Sequelize } from 'sequelize';
 
-module.exports = (sequelize, DataTypes) =>
+export default (sequelize: Sequelize) =>
   sequelize.define('Vehicle', {
     make: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     model: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     year: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     licensePlate: {
       type: DataTypes.STRING,
-      allowNull: false
-    }
-    
-  })
+      allowNull: false,
+    },
+  });

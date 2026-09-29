@@ -1,22 +1,24 @@
-module.exports = (sequelize, DataTypes) =>
+import { DataTypes, Sequelize } from 'sequelize';
+
+export default (sequelize: Sequelize) =>
   sequelize.define('Service', {
     serviceType: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     date: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
     },
     mileage: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     cost: {
       type: DataTypes.FLOAT,
-      allowNull: false
+      allowNull: false,
     },
     notes: {
-      type: DataTypes.TEXT
-    }
+      type: DataTypes.TEXT,
+    },
   });

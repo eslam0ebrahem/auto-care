@@ -1,10 +1,11 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('../models/index.js');
+import { Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import db from '../models/index';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'codeWorks';
 
-async function register(req, res) {
+export async function register(req: any, res: Response) {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -48,7 +49,7 @@ async function register(req, res) {
   }
 }
 
-async function login(req, res) {
+export async function login(req: any, res: Response) {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -84,7 +85,7 @@ async function login(req, res) {
   }
 }
 
-async function getMe(req, res) {
+export async function getMe(req: any, res: Response) {
   try {
     const user = await db.User.findByPk(req.userId, {
       attributes: ['id', 'name', 'email'],
@@ -98,5 +99,3 @@ async function getMe(req, res) {
     res.status(500).json({ msg: 'Server error.' });
   }
 }
-
-module.exports = { register, login, getMe };

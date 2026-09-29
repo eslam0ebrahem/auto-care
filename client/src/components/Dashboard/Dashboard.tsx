@@ -1,17 +1,13 @@
 import { useMemo } from "react";
-import type { ServiceRecord, ServiceVehicle } from "../../apiService/serviceApi";
+import type { ServiceRecord } from "../../apiService/serviceApi";
 import type { VehicleRecord } from "../../apiService/vehicleApi";
 import { serviceInterval } from "../../serviceInterval.js";
 import ExportPrintButton from "../ExportPrintButton/ExportPrintButton";
-import ServiceReminder, { getServiceDueDate } from "../ServiceReminder/ServiceReminder.jsx";
-
-interface DashboardService extends ServiceRecord {
-  Vehicle: ServiceVehicle;
-}
+import ServiceReminder, { getServiceDueDate } from "../ServiceReminder/ServiceReminder";
 
 interface DashboardProps {
   vehicles: VehicleRecord[];
-  services: DashboardService[];
+  services: ServiceRecord[];
 }
 
 export default function Dashboard({ vehicles, services }: DashboardProps) {
@@ -96,7 +92,7 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
           <div key={service.id} className="bg-neutral-800 border border-neutral-800 rounded-xl mb-3 flex justify-between">
             <div className="p-3">
               <div className="flex gap-1 text-neutral-400">
-                <p>{service.Vehicle.licensePlate}</p>
+                <p>{service.Vehicle?.licensePlate}</p>
               </div>
               <p className="font-medium">{service.serviceType}</p>
               <p className="text-sm text-neutral-400 mb-1">

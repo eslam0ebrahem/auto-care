@@ -5,11 +5,11 @@ import { getServices } from './apiService/serviceApi';
 import { getMe } from './apiService/authApi';
 
 import Navbar from './components/Navbar/Navbar.jsx';
-import Dashboard from './components/Dashboard/Dashboard.jsx';
-import MyVehicles from './components/MyVehicles/MyVehicles.jsx';
+import Dashboard from './components/Dashboard/Dashboard';
+import MyVehicles from './components/MyVehicles/MyVehicles';
 import VehicleDetails from './components/VehicleDetails/VehicleDetails.jsx';
-import LogService from './components/LogService/LogService.jsx';
-import LoginModal from './components/LoginModal/LoginModal.jsx';
+import LogService from './components/LogService/LogService';
+import LoginModal from './components/LoginModal/LoginModal';
 
 function App() {
   const [user, setUser] = useState(null);

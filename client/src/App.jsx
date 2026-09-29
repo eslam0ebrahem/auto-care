@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
-import { getVehicles } from './apiService/vehicleApi.js';
-import { getServices } from './apiService/serviceApi.js';
-import { getMe } from './apiService/authApi.js';
+import { getVehicles } from './apiService/vehicleApi';
+import { getServices } from './apiService/serviceApi';
+import { getMe } from './apiService/authApi';
 
 import Navbar from './components/Navbar/Navbar.jsx';
 import Dashboard from './components/Dashboard/Dashboard.jsx';

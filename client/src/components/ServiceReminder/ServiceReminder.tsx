@@ -9,13 +9,19 @@ export function getServiceDueDate(service: ServiceRecord): number {
   return new Date(year, month - 1, day).getTime();
 }
 
+export function isServiceOverdue(service: ServiceRecord): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return getServiceDueDate(service) < today.getTime();
+}
+
 function getServiceDueMessage(service: ServiceRecord): string | null {
   const dueDate = new Date(getServiceDueDate(service));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const daysUntilDue = Math.round((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (daysUntilDue < 0) return "Service overdue";
+  if (isServiceOverdue(service)) return "Service overdue";
   if (daysUntilDue > 3) return null;
   if (daysUntilDue === 0) return "Service due today";
   if (daysUntilDue === 1) return "Service due tomorrow";

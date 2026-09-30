@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ServiceRecord } from "../../apiService/serviceApi";
 import type { VehicleRecord } from "../../apiService/vehicleApi";
-import { serviceInterval } from "../../serviceInterval.js";
 import ExportPrintButton from "../ExportPrintButton/ExportPrintButton";
-import ServiceReminder, { getServiceDueDate } from "../ServiceReminder/ServiceReminder";
+import OverdueServices from "../OverdueServices/OverdueServices";
+import ServiceReminder, { getServiceDueDate, isServiceOverdue } from "../ServiceReminder/ServiceReminder";
 
 interface DashboardProps {
   vehicles: VehicleRecord[];
@@ -11,30 +11,18 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ vehicles, services }: DashboardProps) {
+  const [showOverdueServices, setShowOverdueServices] = useState(false);
+
   const recentActivity = useMemo(() => {
-    return [...services]
+    return services
+      .filter((service) => !isServiceOverdue(service))
       .sort((firstService, secondService) => getServiceDueDate(firstService) - getServiceDueDate(secondService))
       .slice(0, 5);
   }, [services]);
 
   const overdueServices = useMemo(() => {
-    return vehicles.filter((vehicle) => {
-      const oilChanges = vehicle.Services?.filter((service) => service.serviceType === "Oil Change");
-
-      if (!oilChanges || oilChanges.length === 0) return false;
-
-      const lastOilChange = oilChanges.reduce((latest, current) =>
-        new Date(current.date) > new Date(latest.date) ? current : latest,
-      );
-
-      const { months } = serviceInterval.oilChange;
-      const lastChanged = new Date(lastOilChange.date);
-      const nextDue = new Date(lastChanged);
-      nextDue.setMonth(nextDue.getMonth() + months);
-
-      return new Date() >= nextDue;
-    }).length;
-  }, [vehicles]);
+    return services.filter(isServiceOverdue);
+  }, [services]);
 
   return (
     <div>
@@ -67,7 +55,12 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
               <p className="text-neutral-400">Service Records</p>
             </div>
           </div>
-          <div className="bg-neutral-800 border border-neutral-800 flex items-center p-5 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setShowOverdueServices((isVisible) => !isVisible)}
+            aria-pressed={showOverdueServices}
+            className="bg-neutral-800 border border-neutral-800 flex items-center p-5 rounded-xl text-left cursor-pointer hover:bg-neutral-700 transition"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="48px"
@@ -76,16 +69,18 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
               fill="#e82c0fff"><path d="m40-120 440-760 440 760H40Zm104-60h672L480-760 144-180Zm361.5-65.68q8.5-8.67 8.5-21.5 0-12.82-8.68-21.32-8.67-8.5-21.5-8.5-12.82 0-21.32 8.68-8.5 8.67-8.5 21.5 0 12.82 8.68 21.32 8.67 8.5 21.5 8.5 12.82 0 21.32-8.68ZM454-348h60v-224h-60v224Zm26-122Z" />
             </svg>
             <div className="ml-3">
-              <p className="text-2xl font-bold mt-1">{overdueServices}</p>
+              <p className="text-2xl font-bold mt-1">{overdueServices.length}</p>
               <p className="text-neutral-400">Overdue Services</p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
-      <h2 className="text-3xl mb-5 font-bold">Recent Activity</h2>
-      {recentActivity.length === 0 ? (
+      <h2 className="text-3xl mb-5 font-bold">{showOverdueServices ? "Overdue Services" : "Recent Activity"}</h2>
+      {showOverdueServices ? (
+        <OverdueServices services={overdueServices} />
+      ) : recentActivity.length === 0 ? (
         <div className="border border-neutral-700 rounded-xl p-6 text-neutral-400 text-sm text-center">
-          No services logged yet.
+          No recent services.
         </div>
       ) : (
         recentActivity.map((service) => (

@@ -22,10 +22,16 @@ export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
     setError("");
     setLoading(true);
 
+    const normalizedEmail = form.email.trim().toLowerCase();
+
     try {
       const data = isRegistering
-        ? await registerUser(form)
-        : await loginUser({ email: form.email, password: form.password });
+        ? await registerUser({
+            name: form.name.trim(),
+            email: normalizedEmail,
+            password: form.password,
+          })
+        : await loginUser({ email: normalizedEmail, password: form.password });
       localStorage.setItem("token", data.token);
       onLoginSuccess(data.user);
     } catch (error) {
@@ -85,11 +91,15 @@ export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
             <input
               required
               type="password"
+              minLength={6}
               placeholder="••••••••"
               value={form.password}
               onChange={(event) => setForm({ ...form, password: event.target.value })}
               className="w-full bg-neutral-900 border border-neutral-700 rounded-xl p-3 text-white focus:outline-none focus:border-orange-500"
             />
+            {isRegistering && (
+              <p className="text-xs text-neutral-400 mt-1">Must be at least 6 characters</p>
+            )}
           </div>
 
           <button
@@ -104,6 +114,7 @@ export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
         <div className="mt-6 text-center text-sm text-neutral-400">
           {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
           <button
+            type="button"
             onClick={() => {
               setIsRegistering(!isRegistering);
               setError("");

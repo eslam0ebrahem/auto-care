@@ -27,6 +27,11 @@ interface VehicleDeleteResponse {
   msg: string;
 }
 
+interface ApiErrorResponse {
+  msg?: string;
+  error?: string;
+}
+
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('token');
   return {
@@ -35,16 +40,28 @@ function getAuthHeaders(): HeadersInit {
   };
 }
 
+async function parseResponse<T>(res: Response, fallbackMessage: string): Promise<T> {
+  let data: any = {};
+  try {
+    data = await res.json();
+  } catch {
+    // Non-JSON response
+  }
+
+  if (!res.ok) {
+    const errorMsg = (data as ApiErrorResponse)?.msg || (data as ApiErrorResponse)?.error || fallbackMessage;
+    throw new Error(errorMsg);
+  }
+
+  return data as T;
+}
+
 export async function getVehicles(): Promise<VehicleRecord[]> {
   try {
     const res = await fetch(`${URL}/vehicles`, {
       headers: getAuthHeaders(),
     });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch vehicles: ${res.status}`);
-    }
-    return (await res.json()) as VehicleRecord[];
+    return await parseResponse<VehicleRecord[]>(res, 'Failed to fetch vehicles');
   } catch (error) {
     console.error(error);
     return [];
@@ -52,72 +69,37 @@ export async function getVehicles(): Promise<VehicleRecord[]> {
 }
 
 export async function getVehicleById(id: number | string | undefined): Promise<VehicleRecord | undefined> {
-  try {
-    const res = await fetch(`${URL}/vehicles/${id}`, {
-      headers: getAuthHeaders(),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch vehicle: ${res.status}`);
-    }
-    return (await res.json()) as VehicleRecord;
-  } catch (error) {
-    console.error(error);
-  }
+  const res = await fetch(`${URL}/vehicles/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  return await parseResponse<VehicleRecord>(res, 'Failed to fetch vehicle');
 }
 
-export async function addVehicle(data: VehicleInput): Promise<VehicleMutationResponse | undefined> {
-  try {
-    const res = await fetch(`${URL}/vehicles`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to add vehicle: ${res.status}`);
-    }
-
-    return (await res.json()) as VehicleMutationResponse;
-  } catch (error) {
-    console.error(error);
-  }
+export async function addVehicle(data: VehicleInput): Promise<VehicleMutationResponse> {
+  const res = await fetch(`${URL}/vehicles`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  return await parseResponse<VehicleMutationResponse>(res, 'Failed to add vehicle');
 }
 
-export async function removeVehicle(id: number | string | undefined): Promise<VehicleDeleteResponse | undefined> {
-  try {
-    const res = await fetch(`${URL}/vehicles/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to delete vehicle: ${res.status}`);
-    }
-
-    return (await res.json()) as VehicleDeleteResponse;
-  } catch (error) {
-    console.error(error);
-  }
+export async function removeVehicle(id: number | string | undefined): Promise<VehicleDeleteResponse> {
+  const res = await fetch(`${URL}/vehicles/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  return await parseResponse<VehicleDeleteResponse>(res, 'Failed to delete vehicle');
 }
 
 export async function editVehicle(
   id: number | string,
   data: Partial<VehicleInput>,
-): Promise<VehicleDeleteResponse | undefined> {
-  try {
-    const res = await fetch(`${URL}/vehicles/${id}`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to edit vehicle: ${res.status}`);
-    }
-
-    return (await res.json()) as VehicleDeleteResponse;
-  } catch (error) {
-    console.error(error);
-  }
+): Promise<VehicleMutationResponse> {
+  const res = await fetch(`${URL}/vehicles/${id}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  return await parseResponse<VehicleMutationResponse>(res, 'Failed to edit vehicle');
 }

@@ -1,37 +1,26 @@
 import type { ServiceRecord } from "../../apiService/serviceApi";
+import { getServiceDueMessage } from "../../serviceInterval.js";
 
 interface ServiceReminderProps {
   service: ServiceRecord;
 }
 
-export function getServiceDueDate(service: ServiceRecord): number {
-  const [year, month, day] = service.date.split("T")[0].split("-").map(Number);
-  return new Date(year, month - 1, day).getTime();
-}
-
-export function isServiceOverdue(service: ServiceRecord): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return getServiceDueDate(service) < today.getTime();
-}
-
-function getServiceDueMessage(service: ServiceRecord): string | null {
-  const dueDate = new Date(getServiceDueDate(service));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const daysUntilDue = Math.round((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (isServiceOverdue(service)) return "Service overdue";
-  if (daysUntilDue > 3) return null;
-  if (daysUntilDue === 0) return "Service due today";
-  if (daysUntilDue === 1) return "Service due tomorrow";
-  return `Service due in ${daysUntilDue} days`;
-}
-
 export default function ServiceReminder({ service }: ServiceReminderProps) {
+  const message = getServiceDueMessage(service);
+
+  if (!message) {
+    return <div className="flex-1 px-4" />;
+  }
+
+  const isOverdue = message.toLowerCase().includes("overdue");
+
   return (
-    <div className="flex-1 flex items-center justify-center px-4 text-center text-orange-400 text-sm font-semibold">
-      {getServiceDueMessage(service)}
+    <div
+      className={`flex-1 flex items-center justify-center px-4 text-center text-sm font-semibold ${
+        isOverdue ? "text-red-400" : "text-orange-400"
+      }`}
+    >
+      {message}
     </div>
   );
 }

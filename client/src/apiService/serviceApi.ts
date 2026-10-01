@@ -26,7 +26,7 @@ export interface ServiceRecord {
   serviceType: string;
   date: string;
   mileage: number;
-  cost: number | string;
+  cost: number;
   notes: string | null;
   Vehicle?: ServiceVehicle;
 }
@@ -34,11 +34,6 @@ export interface ServiceRecord {
 interface ServiceMutationResponse {
   msg: string;
   service?: ServiceRecord;
-}
-
-interface ApiErrorResponse {
-  msg?: string;
-  error?: string;
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -49,59 +44,70 @@ function getAuthHeaders(): HeadersInit {
   };
 }
 
-async function parseResponse<T>(res: Response, fallbackMessage: string): Promise<T> {
-  let data: any = {};
-  try {
-    data = await res.json();
-  } catch {
-    // Non-JSON response
-  }
-
-  if (!res.ok) {
-    const errorMsg = (data as ApiErrorResponse)?.msg || (data as ApiErrorResponse)?.error || fallbackMessage;
-    throw new Error(errorMsg);
-  }
-
-  return data as T;
-}
-
 export async function getServices(): Promise<ServiceRecord[]> {
   try {
     const res = await fetch(`${URL}/services`, {
       headers: getAuthHeaders(),
     });
-    return await parseResponse<ServiceRecord[]>(res, 'Failed to fetch services');
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch services: ${res.status}`);
+    }
+    return (await res.json()) as ServiceRecord[];
   } catch (error) {
     console.error(error);
     return [];
   }
 }
 
-export async function addService(data: ServiceInput): Promise<ServiceMutationResponse> {
-  const res = await fetch(`${URL}/services`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  return await parseResponse<ServiceMutationResponse>(res, 'Failed to add service');
+export async function addService(data: ServiceInput): Promise<ServiceMutationResponse | undefined> {
+  try {
+    const res = await fetch(`${URL}/services`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to add service: ${res.status}`);
+    }
+
+    return (await res.json()) as ServiceMutationResponse;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-export async function removeService(id: number | string): Promise<ServiceMutationResponse> {
-  const res = await fetch(`${URL}/services/${id}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  return await parseResponse<ServiceMutationResponse>(res, 'Failed to delete service');
+export async function removeService(id: number | string): Promise<ServiceMutationResponse | undefined> {
+  try {
+    const res = await fetch(`${URL}/services/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to delete service: ${res.status}`);
+    }
+
+    return (await res.json()) as ServiceMutationResponse;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function editService(
   id: number | string,
-  data: Partial<ServiceInput>,
-): Promise<ServiceMutationResponse> {
-  const res = await fetch(`${URL}/services/${id}`, {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  return await parseResponse<ServiceMutationResponse>(res, 'Failed to edit service');
+  data: ServiceInput,
+): Promise<ServiceMutationResponse | undefined> {
+  try {
+    const res = await fetch(`${URL}/services/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    return (await res.json()) as ServiceMutationResponse;
+  } catch (error) {
+    console.error(error);
+  }
 }

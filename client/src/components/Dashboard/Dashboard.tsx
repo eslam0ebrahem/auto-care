@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import type { ServiceRecord } from "../../apiService/serviceApi";
 import type { VehicleRecord } from "../../apiService/vehicleApi";
-import { isServiceOverdue } from "../../serviceInterval.js";
 import ExportPrintButton from "../ExportPrintButton/ExportPrintButton";
 import OverdueServices from "../OverdueServices/OverdueServices";
-import ServiceReminder from "../ServiceReminder/ServiceReminder";
+import ServiceReminder, { getServiceDueDate, isServiceOverdue } from "../ServiceReminder/ServiceReminder";
 
 interface DashboardProps {
   vehicles: VehicleRecord[];
@@ -15,8 +14,9 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
   const [showOverdueServices, setShowOverdueServices] = useState(false);
 
   const recentActivity = useMemo(() => {
-    return [...services]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    return services
+      .filter((service) => !isServiceOverdue(service))
+      .sort((firstService, secondService) => getServiceDueDate(firstService) - getServiceDueDate(secondService))
       .slice(0, 5);
   }, [services]);
 
@@ -28,7 +28,7 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
     <div>
       <div>
         <h1 className="text-3xl mb-6 font-bold">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-3 gap-6 mb-8">
           <div className="bg-neutral-800 border border-neutral-800 flex items-center p-5 rounded-xl">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -83,31 +83,25 @@ export default function Dashboard({ vehicles, services }: DashboardProps) {
           No recent services.
         </div>
       ) : (
-        recentActivity.map((service) => {
-          const costNumber = Number(service.cost);
-          const formattedCost = isNaN(costNumber) ? "0.00" : costNumber.toFixed(2);
-          const licensePlate = service.Vehicle?.licensePlate || "N/A";
-
-          return (
-            <div key={service.id} className="bg-neutral-800 border border-neutral-800 rounded-xl mb-3 flex flex-col sm:flex-row justify-between gap-4 p-4">
-              <div className="p-1">
-                <div className="flex gap-1 text-neutral-400 font-mono text-sm">
-                  <p>{licensePlate}</p>
-                </div>
-                <p className="font-semibold text-lg">{service.serviceType}</p>
-                <p className="text-sm text-neutral-400 mb-1">
-                  {new Date(service.date).toLocaleDateString()} • {service.mileage.toLocaleString()} mi
-                </p>
-                {service.notes && <p className="text-sm text-neutral-400 mt-1">{service.notes}</p>}
+        recentActivity.map((service) => (
+          <div key={service.id} className="bg-neutral-800 border border-neutral-800 rounded-xl mb-3 flex justify-between">
+            <div className="p-3">
+              <div className="flex gap-1 text-neutral-400">
+                <p>{service.Vehicle?.licensePlate}</p>
               </div>
-              <ServiceReminder service={service} />
-              <div className="flex items-center justify-end gap-4 p-1">
-                <ExportPrintButton service={service} />
-                <p className="text-2xl sm:text-3xl font-bold whitespace-nowrap">£{formattedCost}</p>
-              </div>
+              <p className="font-medium">{service.serviceType}</p>
+              <p className="text-sm text-neutral-400 mb-1">
+                {new Date(service.date).toLocaleDateString()} • {service.mileage.toLocaleString()} mi
+              </p>
+              <p className="text-sm text-neutral-400 mt-1">{service.notes}</p>
             </div>
-          );
-        })
+            <ServiceReminder service={service} />
+            <div className="flex items-center justify-end gap-6 p-3 content-center">
+              <ExportPrintButton service={service} />
+              <p className="ml-2 text-4xl font-bold whitespace-nowrap">£{service.cost.toFixed(2)}</p>
+            </div>
+          </div>
+        ))
       )}
     </div>
   );

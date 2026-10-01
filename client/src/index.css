@@ -1,35 +1,8 @@
 @import 'tailwindcss';
 
+
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-
-@media print {
-  nav,
-  button,
-  .no-print {
-    display: none !important;
-  }
-
-  body,
-  #root,
-  .min-h-screen {
-    background-color: white !important;
-    color: black !important;
-  }
-
-  .bg-neutral-800,
-  .bg-neutral-900 {
-    background-color: #f9f9f9 !important;
-    border-color: #ddd !important;
-    color: black !important;
-  }
-
-  .text-white,
-  .text-neutral-300,
-  .text-neutral-400 {
-    color: #222 !important;
-  }
 }

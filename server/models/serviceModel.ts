@@ -13,10 +13,16 @@ export default (sequelize: Sequelize) =>
     mileage: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: 0,
+      },
     },
     cost: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      validate: {
+        min: 0,
+      },
     },
     notes: {
       type: DataTypes.TEXT,

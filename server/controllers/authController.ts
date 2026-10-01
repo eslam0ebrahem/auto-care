@@ -1,11 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../models/index';
+import { getJwtSecret } from '../config';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'codeWorks';
-
-export async function register(req: any, res: Response) {
+export async function register(req: Request, res: Response) {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -14,8 +14,21 @@ export async function register(req: any, res: Response) {
       .json({ msg: 'Please provide name, email, and password.' });
   }
 
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const trimmedName = String(name).trim();
+
+  if (trimmedName.length === 0) {
+    return res.status(400).json({ msg: 'Please provide a valid name.' });
+  }
+
+  if (String(password).length < 6) {
+    return res
+      .status(400)
+      .json({ msg: 'Password must be at least 6 characters long.' });
+  }
+
   try {
-    const existingUser = await db.User.findOne({ where: { email } });
+    const existingUser = await db.User.findOne({ where: { email: normalizedEmail } });
     if (existingUser) {
       return res
         .status(400)
@@ -26,12 +39,12 @@ export async function register(req: any, res: Response) {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await db.User.create({
-      name,
-      email,
+      name: trimmedName,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: user.id }, getJwtSecret(), {
       expiresIn: '7d',
     });
 
@@ -49,15 +62,17 @@ export async function register(req: any, res: Response) {
   }
 }
 
-export async function login(req: any, res: Response) {
+export async function login(req: Request, res: Response) {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ msg: 'Please provide email and password.' });
   }
 
+  const normalizedEmail = String(email).trim().toLowerCase();
+
   try {
-    const user = await db.User.findOne({ where: { email } });
+    const user = await db.User.findOne({ where: { email: normalizedEmail } });
     if (!user) {
       return res.status(400).json({ msg: 'Invalid email or password.' });
     }
@@ -67,7 +82,7 @@ export async function login(req: any, res: Response) {
       return res.status(400).json({ msg: 'Invalid email or password.' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: user.id }, getJwtSecret(), {
       expiresIn: '7d',
     });
 
@@ -85,7 +100,7 @@ export async function login(req: any, res: Response) {
   }
 }
 
-export async function getMe(req: any, res: Response) {
+export async function getMe(req: AuthenticatedRequest, res: Response) {
   try {
     const user = await db.User.findByPk(req.userId, {
       attributes: ['id', 'name', 'email'],

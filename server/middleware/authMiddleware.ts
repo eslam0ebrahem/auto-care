@@ -1,9 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from '../config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'codeWorks';
+export interface AuthenticatedRequest extends Request {
+  userId?: number;
+}
 
-export default function authMiddleware(req: any, res: Response, next: NextFunction) {
+export default function authMiddleware(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -15,7 +22,7 @@ export default function authMiddleware(req: any, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret()) as { userId: number };
     req.userId = decoded.userId;
     next();
   } catch (error) {

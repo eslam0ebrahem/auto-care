@@ -13,6 +13,9 @@ export default (sequelize: Sequelize) =>
     year: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: 1900,
+      },
     },
     licensePlate: {
       type: DataTypes.STRING,

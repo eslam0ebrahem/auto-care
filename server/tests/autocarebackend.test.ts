@@ -1,5 +1,7 @@
 import request from 'supertest';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import app from '../app';
+import db from '../models';
 
 type UserResponse = {
   token: string;
@@ -15,13 +17,16 @@ type VehicleResponse = {
   };
 };
 
-const api = request('http://127.0.0.1:3005');
+const api = request(app);
 const uniqueEmail = `vehicle-test-${Date.now()}@example.com`;
 let authorization = '';
 let createdVehicleId = 0;
 
 describe('Vehicle endpoints', () => {
   beforeAll(async () => {
+    await db.sequelize.authenticate();
+    await db.sequelize.sync({ alter: true });
+
     const response = await api.post('/auth/register').send({
       name: 'Vehicle Test User',
       email: uniqueEmail,
@@ -30,6 +35,10 @@ describe('Vehicle endpoints', () => {
 
     const body = response.body as UserResponse;
     authorization = `Bearer ${body.token}`;
+  });
+
+  afterAll(async () => {
+    await db.sequelize.close();
   });
 
   it('rejects requests without authentication', async () => {

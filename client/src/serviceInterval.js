@@ -9,7 +9,6 @@ export const serviceIntervals = {
 
 export const DEFAULT_SERVICE_INTERVAL_MONTHS = 12;
 
-// Retain backwards compatibility for any direct references
 export const serviceInterval = {
   oilChange: {
     months: 6,
@@ -31,6 +30,14 @@ export function getServiceDueDate(service) {
   const nextDueDate = new Date(lastDate);
   nextDueDate.setMonth(nextDueDate.getMonth() + months);
   return nextDueDate.getTime();
+}
+
+export function isServiceOverdue(service) {
+  const due = getServiceDueDate(service);
+  if (!due) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return due < today.getTime();
 }
 
 export function getServiceDueMessage(service) {

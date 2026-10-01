@@ -1,10 +1,15 @@
 {
   "name": "auto-care",
   "version": "1.0.0",
-  "description": "",
+  "description": "Vehicle and maintenance tracker",
   "main": "index.js",
   "scripts": {
-    "test": "start-server-and-test server:start 3005 server:test",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "db:create": "node server/scripts/createDb.js",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "lint": "npm --prefix client run lint",
+    "test": "npm --prefix server run test",
     "server:start": "npm --prefix server run start",
     "server:test": "npm --prefix server run test"
   },
@@ -21,6 +26,7 @@
   },
   "homepage": "https://github.com/ivangeorgiev22/auto-care#readme",
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "start-server-and-test": "^2.0.13"
   }
 }

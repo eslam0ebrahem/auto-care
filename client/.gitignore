@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# real env files must never be committed
+.env
+.env.local
+.env.*.local
